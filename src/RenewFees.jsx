@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, CreditCard, Search } from "lucide-react";
+import { ArrowLeft, CreditCard, Search, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const BASE_URL = "https://muscle-nation-gym.onrender.com";
@@ -200,6 +200,28 @@ export default function RenewGymFees({ embedded = false }) {
       setMessage("Error renewing fees.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteFeeRecord = async (id) => {
+    const confirmed = window.confirm("Delete this renewal record?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`${BASE_URL}/fees/delete/${id}/`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        setMessage(data.error || "Could not delete renewal record.");
+        return;
+      }
+
+      setMessage(data.message || "Renewal record deleted.");
+      setFeesRecords((records) => records.filter((record) => record.id !== id));
+    } catch {
+      setMessage("Error deleting renewal record.");
     }
   };
 
@@ -463,7 +485,7 @@ export default function RenewGymFees({ embedded = false }) {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[860px] text-left text-sm">
+            <table className="w-full min-w-[960px] text-left text-sm">
               <thead className="bg-zinc-950 text-xs uppercase text-zinc-400">
                 <tr>
                   <th className="px-4 py-3">Member</th>
@@ -475,6 +497,7 @@ export default function RenewGymFees({ embedded = false }) {
                   <th className="px-4 py-3">Payment</th>
                   <th className="px-4 py-3">Cash</th>
                   <th className="px-4 py-3">GPay</th>
+                  <th className="px-4 py-3">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -500,11 +523,21 @@ export default function RenewGymFees({ embedded = false }) {
                     <td className="px-4 py-3 capitalize">{f.payment_method}</td>
                     <td className="px-4 py-3">Rs.{f.cash_amount || 0}</td>
                     <td className="px-4 py-3">Rs.{f.gpay_amount || 0}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => deleteFeeRecord(f.id)}
+                        className="grid h-9 w-9 place-items-center rounded border border-red-900/70 bg-red-950/40 text-red-300 hover:bg-red-900/50"
+                        title="Delete renewal record"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {feesRecords.length === 0 && (
                   <tr>
-                    <td colSpan="9" className="px-4 py-10 text-center text-zinc-400">
+                    <td colSpan="10" className="px-4 py-10 text-center text-zinc-400">
                       No renewal records found.
                     </td>
                   </tr>
