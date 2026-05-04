@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import AdminLogin from "./AdminLogin";
-import Home from "./home";
+import Home from "./Home";
 import NewAdmission from "./NewAdmission";
 import Revenue from "./Revenue";
 
